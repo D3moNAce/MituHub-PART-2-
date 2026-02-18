@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MituHub | Esports Gaming PCs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+        
+        :root {
+            --primary: #3b82f6;
+            --secondary: #9333ea;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .reveal-on-scroll {
+            opacity: 0;
+            transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transform: translateY(30px);
+        }
+
+        .reveal-on-scroll.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateY(-10px) scale(1.02);
+            border-color: var(--primary);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(59, 130, 246, 0.2);
+        }
+
+        .component-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .component-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            z-index: 1;
+        }
+
+        .faq-item {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 200px;
+        }
+
+        .faq-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(180deg);
+        }
+
+        .btn-interact {
+            transition: all 0.2s active;
+        }
+
+        .btn-interact:active {
+            transform: scale(0.95);
+        }
+
+        .gradient-text {
+            background: linear-gradient(90deg, #3b82f6, #9333ea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80vw;
+            height: 80vh;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, rgba(0,0,0,0) 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Mobile Menu Overlay */
+        #mobile-overlay {
+            clip-path: circle(0% at 100% 0%);
+            transition: clip-path 0.5s ease-in-out;
+        }
+        #mobile-overlay.open {
+            clip-path: circle(150% at 100% 0%);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #444; }
+
+        .toast-notification {
+            transform: translateX(120%);
+            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        .toast-notification.show { transform: translateX(0); }
+
+        /* Filter classes */
+        .pc-card.hidden-card {
+            display: none;
+            opacity: 0;
+            transform: scale(0.9);
+        }
+
+        /* Live Chat Widget */
+        #chat-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            height: 450px;
+            background: #1a1a1a;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            transform: translateY(20px) scale(0.95);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #chat-widget.active {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .chat-header {
+            padding: 16px;
+            background: #0a0a0a;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px 16px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.4;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.bot {
+            background: rgba(255,255,255,0.1);
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+        }
+
+        .message.user {
+            background: #3b82f6;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+
+        .chat-input-area {
+            padding: 16px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            gap: 10px;
+            background: #1a1a1a;
+            border-radius: 0 0 16px 16px;
+        }
+
+        .chat-input {
+            flex-grow: 1;
+            background: rgba(255,255,255,0.05);
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            color: white;
+            font-size: 14px;
+        }
+        .chat-input:focus { outline: none; background: rgba(255,255,255,0.1); }
+        
+        .typing-indicator span {
+            display: inline-block;
+            width: 4px;
+            height: 4px;
+            background-color: white;
+            border-radius: 50%;
+            animation: typing 1s infinite;
+            margin: 0 2px;
+        }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typing {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        /* Products Modal */
+        #product-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        #product-modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .modal-content {
+            background: #111;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 90%;
+            max-width: 900px;
+            max-height: 85vh;
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        #product-modal.active .modal-content {
+            transform: scale(1);
+        }
+
+        /* Cart Sidebar */
+        #cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            max-width: 400px;
+            height: 100vh;
+            background: #0a0a0a;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(255,255,255,0.1);
+            z-index: 3000;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            box-shadow: -10px 0 50px rgba(0,0,0,0.5);
+        }
+        #cart-sidebar.active {
+            transform: translateX(0);
+        }
+
+        .cart-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .cart-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            gap: 12px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .cart-footer {
+            padding: 20px;
+            background: rgba(255,255,255,0.02);
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .empty-cart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #555;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-8 right-8 z-[2100] flex flex-col gap-4"></div>
+
+    <!-- Product Modal -->
+    <div id="product-modal">
+        <div class="modal-content">
+            <div class="p-6 border-b border-white/10 flex justify-between items-center bg-zinc-900/50 rounded-t-3xl">
+                <h2 id="modal-title" class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">Category Name</h2>
+                <button onclick="closeProductModal()" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="modal-grid" class="p-8 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Products injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Chat Widget -->
+    <div id="chat-widget">
+        <div class="chat-header">
+            <div class="flex items-center gap-3">
+                <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                <span class="font-bold text-sm">MituHub Support</span>
+            </div>
+            <button onclick="toggleChat()" class="text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <div class="message bot">
+                Hi there! 👋 Welcome to MituHub. How can I help you build your dream PC today?
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" class="chat-input" placeholder="Type a message..." onkeypress="handleChatKey(event)">
+            <button onclick="sendMessage()" class="text-blue-500 hover:text-blue-400 transition-colors px-2">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Cart Sidebar -->
+    <div id="cart-sidebar">
+        <div class="cart-header">
+            <h2 class="text-xl font-bold flex items-center gap-2">
+                <i class="fas fa-shopping-bag text-blue-500"></i> Your Cart
+            </h2>
+            <button onclick="toggleCart()" class="text-gray-400 hover:text-white">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <div id="cart-items-container" class="cart-items">
+            <!-- Items injected via JS -->
+            <div class="empty-cart">
+                <i class="fas fa-shopping-cart text-4xl mb-3 opacity-20"></i>
+                <p>Your cart is empty.</p>
+                <button onclick="toggleCart()" class="mt-4 text-blue-500 text-sm font-bold hover:underline">Start Shopping</button>
+            </div>
+        </div>
+        <div class="cart-footer">
+            <!-- Discount Code Section -->
+            <div class="mb-4 pt-2">
+                <div class="flex gap-2">
+                    <input type="text" id="discount-input" placeholder="Promo Code" class="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors uppercase">
+                    <button onclick="applyDiscount()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors">APPLY</button>
+                </div>
+                <p id="discount-msg" class="text-xs mt-2 hidden"></p>
+            </div>
+            
+            <!-- Totals Section -->
+            <div class="space-y-2 mb-6">
+                <div class="flex justify-between text-sm text-gray-400">
+                    <span>Subtotal</span>
+                    <span id="cart-subtotal" class="text-white font-bold">₹0</span>
+                </div>
+                <div id="discount-row" class="flex justify-between text-sm text-green-400 hidden">
+                    <span>Discount <span id="discount-code-label" class="text-xs bg-green-500/10 px-1 rounded ml-1 text-green-500 uppercase"></span></span>
+                    <span id="cart-discount" class="font-bold">-₹0</span>
+                </div>
+                <div class="flex justify-between text-xl font-bold pt-4 border-t border-white/10">
+                    <span>Total</span>
+                    <span id="cart-total" class="text-blue-400">₹0</span>
+                </div>
+            </div>
+            <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-blue-600/20 active:scale-95">
+                CHECKOUT
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-overlay" class="fixed inset-0 bg-black z-[60] flex flex-col items-center justify-center space-y-8 text-2xl font-bold">
+        <button id="close-menu" class="absolute top-8 right-8 text-4xl">&times;</button>
+        <a href="#builds" class="mobile-link hover:text-blue-500 transition">PC BUILDS</a>
+        <a href="#components" class="mobile-link hover:text-blue-500 transition">COMPONENTS</a>
+        <a href="#support" class="mobile-link hover:text-blue-500 transition">SUPPORT</a>
+        <button class="bg-blue-600 px-8 py-3 rounded-full text-lg">BUILD NOW</button>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 bg-black/80 backdrop-blur-md border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center gap-2 group cursor-pointer">
+                    <svg class="group-hover:rotate-12 transition-transform duration-500" width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20 80V20L50 50L80 20V80" stroke="url(#logo-grad)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="50" cy="50" r="45" stroke="url(#logo-grad)" stroke-width="2" stroke-dasharray="8 8"/>
+                        <defs>
+                            <linearGradient id="logo-grad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#3b82f6"/>
+                                <stop offset="1" stop-color="#9333ea"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <span class="text-2xl font-bold tracking-tighter">MITU<span class="text-blue-500">HUB</span></span>
+                </div>
+
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#builds" class="nav-link text-sm font-medium hover:text-blue-500 transition py-2">PC BUILDS</a>
+                    <a href="#components" class="nav-link text-sm font-medium hover:text-blue-500 transition py-2">COMPONENTS</a>
+                    <a href="#support" class="nav-link text-sm font-medium hover:text-blue-500 transition py-2">SUPPORT</a>
+                    
+                    <div class="flex items-center gap-4 ml-4 pl-4 border-l border-white/10">
+                        <button onclick="toggleCart()" class="relative text-gray-400 hover:text-white transition-colors p-2">
+                            <i class="fas fa-shopping-cart text-xl"></i>
+                            <span id="cart-badge-desktop" class="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center opacity-0 transition-opacity">0</span>
+                        </button>
+                        <button class="btn-interact bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-full text-sm font-bold transition-all shadow-lg shadow-blue-500/20">
+                            BUILD YOUR OWN
+                        </button>
+                    </div>
+                </div>
+
+                <div class="md:hidden flex items-center gap-4">
+                    <button onclick="toggleCart()" class="relative text-gray-400 hover:text-white transition-colors p-2">
+                        <i class="fas fa-shopping-cart text-xl"></i>
+                        <span id="cart-badge-mobile" class="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center opacity-0 transition-opacity">0</span>
+                    </button>
+                    <button id="mobile-menu-btn" class="p-2 text-gray-400 btn-interact">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative pt-32 pb-20 overflow-hidden min-h-screen flex items-center">
+        <div class="hero-glow"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="reveal-on-scroll inline-block px-4 py-1.5 mb-6 text-xs font-bold tracking-widest text-blue-400 uppercase bg-blue-400/10 border border-blue-400/20 rounded-full">
+                Professional Esports Configurations
+            </div>
+            <h1 class="reveal-on-scroll text-5xl md:text-8xl font-extrabold mb-6 leading-tight tracking-tight">
+                Dominate with <br/>
+                <span class="gradient-text">MituHub Esports</span>
+            </h1>
+            <p class="reveal-on-scroll max-w-2xl mx-auto text-gray-400 text-lg md:text-xl mb-10">
+                Engineered for maximum frame rates and zero latency. Built by gamers, for gamers. Tested on Valorant, CS2, and Apex Legends.
+            </p>
+            <div class="reveal-on-scroll flex flex-col sm:flex-row justify-center gap-4">
+                <a href="#builds" class="btn-interact px-10 py-4 bg-white text-black font-bold rounded-xl hover:bg-blue-500 hover:text-white transition-all shadow-xl shadow-white/5">
+                    VIEW ESPORTS LINEUP
+                </a>
+                <button onclick="scrollToFilter('AMD')" class="btn-interact px-10 py-4 bg-white/5 border border-white/10 font-bold rounded-xl hover:bg-white/10 transition-all">
+                    CUSTOMIZE SPECS
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- PC Builds Grid -->
+    <section id="builds" class="py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center md:items-end mb-16 gap-8">
+                <div class="text-center md:text-left reveal-on-scroll">
+                    <h2 class="text-4xl font-bold mb-4">Esports Optimized</h2>
+                    <p class="text-gray-400">Select the tier that matches your competitive level.</p>
+                </div>
+                <div class="flex p-1 bg-white/5 rounded-xl border border-white/10 reveal-on-scroll">
+                    <button data-filter="all" class="filter-btn px-6 py-2 rounded-lg text-sm font-bold transition-all bg-blue-600">ALL</button>
+                    <button data-filter="intel" class="filter-btn px-6 py-2 rounded-lg text-sm font-bold transition-all hover:bg-white/5">INTEL</button>
+                    <button data-filter="amd" class="filter-btn px-6 py-2 rounded-lg text-sm font-bold transition-all hover:bg-white/5">AMD</button>
+                </div>
+            </div>
+
+            <div id="pc-container" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Tier 1: Intel -->
+                <div class="pc-card pc-intel glass-card rounded-3xl overflow-hidden p-8 flex flex-col reveal-on-scroll" data-name="Esports Starter V1" data-price="64,990">
+                    <div class="h-64 mb-8 bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-2xl relative group overflow-hidden">
+                        <div class="absolute inset-0 flex items-center justify-center group-hover:scale-110 transition-transform duration-700">
+                             <i class="fas fa-desktop text-9xl text-zinc-700/50"></i>
+                        </div>
+                        <div class="absolute top-4 right-4 bg-green-500 text-black text-[10px] font-extrabold px-3 py-1 rounded-full">
+                            READY TO SHIP
+                        </div>
+                    </div>
+                    <div class="flex-grow">
+                        <div class="text-blue-400 text-xs font-bold uppercase tracking-widest mb-2">The Rookie</div>
+                        <h3 class="text-2xl font-bold mb-6">Esports Starter V1</h3>
+                        <div class="space-y-4 text-sm text-gray-400 mb-8">
+                            <div class="flex justify-between border-b border-white/5 pb-2"><span>CPU</span> <span class="text-white">Core i5-12400F</span></div>
+                            <div class="flex justify-between border-b border-white/5 pb-2"><span>GPU</span> <span class="text-white">RTX 4060 8GB</span></div>
+                            <div class="flex justify-between border-b border-white/5 pb-2"><span>RAM</span> <span class="text-white">16GB DDR4</span></div>
+                            <div class="flex justify-between border-b border-white/5 pb-2"><span>PSU</span> <span class="text-white">650W Bronze</span></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="text-sm text-gray-500 line-through">₹74,999</span>
+                            <div class="text-3xl font-bold">₹64,990</div>
+                        </div>
+                        <button class="add-to-cart-btn btn-interact bg-zinc-800 hover:bg-blue-600 w-12 h-12 rounded-xl transition-all flex items-center justify-center">
+                            <i class="fas fa-shopping-cart"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tier 2: AMD (Featured) -->
+                <div class="pc-card pc-amd glass-card rounded-3xl overflow-hidden p-8 border-2 border-blue-500 relative transform md:scale-105 shadow-2xl shadow-blue-500/10 flex flex-col reveal-on-scroll" data-name="MituHub Apex" data-price="1,49,990" style="transition-delay: 0.1s">
+                    <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-bold px-6 py-1.5 rounded-full uppercase tracking-widest shadow-lg shadow-blue-500/50">
+                        Most Popular
+                    </div>
+                    <div class="h-64 mb-8 bg-gradient-to-br from-blue-900/20 to-zinc-900 rounded-2xl relative group overflow-hidden">
+                        <div class="absolute inset-0 flex items-center justify-center group-hover:scale-110 transition-transform duration-700">
+                             <i class="fas fa-desktop text-9xl text-blue-500/20"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow">
+                        <div class="text-blue-400 text-xs font-bold uppercase tracking-widest mb-2">The Contender</div>
+                        <h3 class="text-2xl font-bold mb-6">MituHub Apex Series</h3>
+                        <div class="space-y-4 text-sm text-gray-400 mb-8">
+                            <div class="flex justify-between border-b border-white/5 pb-2"><span>CPU</span> <span class="text-white">Ryzen 7 7800X3D</span></div>
+                            <div class="flex justify-between border-b border-white/5 pb-2"><span>GPU</span> <span class="text-white">RTX 4070 Super</span></div>
+                            <div class="flex justify-between border-b border-white/5 pb-2"><span>RAM</span> <span class="text-white">32GB DDR5</span></div>
+                            <div class="flex justify-between border-b border-white/5 pb-2"><span>Cooling</span> <span class="text-white">360mm AIO Liquid</span></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="text-sm text-gray-500 line-through">₹1,65,000</span>
+                            <div class="text-3xl font-bold">₹1,49,990</div>
+                        </div>
+                        <button class="add-to-cart-btn btn-interact bg-blue-600 hover:bg-blue-700 w-12 h-12 rounded-xl transition-all flex items-center justify-center shadow-lg shadow-blue-500/40">
+                            <i class="fas fa-shopping-cart"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tier 3: Intel -->
+                <div class="pc-card pc-intel glass-card rounded-3xl overflow-hidden p-8 flex flex-col reveal-on-scroll" data-name="Elite Grandmaster" data-price="2,59,990" style="transition-delay: 0.2s">
+                    <div class="h-64 mb-8 bg-gradient-to-br from-purple-900/10 to-zinc-900 rounded-2xl relative group overflow-hidden">
+                        <div class="absolute inset-0 flex items-center justify-center group-hover:scale-110 transition-transform duration-700">
+                             <i class="fas fa-desktop text-9xl text-purple-500/20"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow">
+                        <div class="text-purple-400 text-xs font-bold uppercase tracking-widest mb-2">The Pro-God</div>
+                        <h3 class="text-2xl font-bold mb-6">Elite Grandmaster</h3>
+                        <div class="space-y-4 text-sm text-gray-400 mb-8">
+                            <div class="flex justify-between border-b border-white/5 pb-2"><span>CPU</span> <span class="text-white">Core i9-14900K</span></div>
+                            <div class="flex justify-between border-b border-white/5 pb-2"><span>GPU</span> <span class="text-white">RTX 4080 Super</span></div>
+                            <div class="flex justify-between border-b border-white/5 pb-2"><span>RAM</span> <span class="text-white">64GB DDR5</span></div>
+                            <div class="flex justify-between border-b border-white/5 pb-2"><span>Board</span> <span class="text-white">Z790 WIFI</span></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="text-sm text-gray-500 line-through">₹2,85,000</span>
+                            <div class="text-3xl font-bold">₹2,59,990</div>
+                        </div>
+                        <button class="add-to-cart-btn btn-interact bg-zinc-800 hover:bg-blue-600 w-12 h-12 rounded-xl transition-all flex items-center justify-center">
+                            <i class="fas fa-shopping-cart"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Components Section -->
+    <section id="components" class="py-24 bg-zinc-900/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-12 reveal-on-scroll">
+                <div>
+                    <h2 class="text-4xl font-bold mb-4">Premium Components</h2>
+                    <p class="text-gray-400">Tap a category to explore specific parts.</p>
+                </div>
+                <button class="text-blue-500 font-bold hover:text-blue-400 transition-colors mt-4 md:mt-0">VIEW ALL PARTS <i class="fas fa-arrow-right ml-2"></i></button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- GPU -->
+                <div onclick="openComponentModal('gpu')" class="glass-card component-card rounded-2xl p-6 relative group cursor-pointer h-64 flex flex-col justify-end reveal-on-scroll hover:shadow-blue-500/20">
+                    <div class="absolute inset-0 flex items-center justify-center z-0 opacity-20 group-hover:opacity-40 transition-opacity">
+                        <i class="fas fa-microchip text-9xl"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <h3 class="text-xl font-bold mb-1 group-hover:text-blue-400 transition-colors">Graphics Cards</h3>
+                        <p class="text-xs text-gray-400 mb-4">NVIDIA RTX 40 & 30 Series</p>
+                        <span class="text-sm font-bold bg-white/10 px-3 py-1 rounded-full backdrop-blur-md">Explore <i class="fas fa-arrow-right ml-1 text-xs"></i></span>
+                    </div>
+                </div>
+
+                <!-- CPU -->
+                <div onclick="openComponentModal('cpu')" class="glass-card component-card rounded-2xl p-6 relative group cursor-pointer h-64 flex flex-col justify-end reveal-on-scroll hover:shadow-purple-500/20" style="transition-delay: 0.1s">
+                    <div class="absolute inset-0 flex items-center justify-center z-0 opacity-20 group-hover:opacity-40 transition-opacity">
+                        <i class="fas fa-server text-9xl"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <h3 class="text-xl font-bold mb-1 group-hover:text-purple-400 transition-colors">Processors</h3>
+                        <p class="text-xs text-gray-400 mb-4">Intel 14th Gen & Ryzen 7000</p>
+                        <span class="text-sm font-bold bg-white/10 px-3 py-1 rounded-full backdrop-blur-md">Explore <i class="fas fa-arrow-right ml-1 text-xs"></i></span>
+                    </div>
+                </div>
+
+                <!-- RAM/Storage -->
+                <div onclick="openComponentModal('memory')" class="glass-card component-card rounded-2xl p-6 relative group cursor-pointer h-64 flex flex-col justify-end reveal-on-scroll hover:shadow-green-500/20" style="transition-delay: 0.2s">
+                    <div class="absolute inset-0 flex items-center justify-center z-0 opacity-20 group-hover:opacity-40 transition-opacity">
+                        <i class="fas fa-memory text-9xl"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <h3 class="text-xl font-bold mb-1 group-hover:text-green-400 transition-colors">Memory & Storage</h3>
+                        <p class="text-xs text-gray-400 mb-4">DDR5 & Gen5 NVMe SSDs</p>
+                        <span class="text-sm font-bold bg-white/10 px-3 py-1 rounded-full backdrop-blur-md">Explore <i class="fas fa-arrow-right ml-1 text-xs"></i></span>
+                    </div>
+                </div>
+
+                <!-- Peripherals -->
+                <div onclick="openComponentModal('gear')" class="glass-card component-card rounded-2xl p-6 relative group cursor-pointer h-64 flex flex-col justify-end reveal-on-scroll hover:shadow-orange-500/20" style="transition-delay: 0.3s">
+                    <div class="absolute inset-0 flex items-center justify-center z-0 opacity-20 group-hover:opacity-40 transition-opacity">
+                        <i class="fas fa-keyboard text-9xl"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <h3 class="text-xl font-bold mb-1 group-hover:text-orange-400 transition-colors">Gear</h3>
+                        <p class="text-xs text-gray-400 mb-4">Pro-Grade Peripherals</p>
+                        <span class="text-sm font-bold bg-white/10 px-3 py-1 rounded-full backdrop-blur-md">Explore <i class="fas fa-arrow-right ml-1 text-xs"></i></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Support Section -->
+    <section id="support" class="py-24 bg-white/5 border-y border-white/5">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal-on-scroll">
+                <h2 class="text-4xl font-bold mb-4">Support & FAQ</h2>
+                <p class="text-gray-400">We've got your back, 24/7. Here are answers to common questions.</p>
+            </div>
+
+            <div class="space-y-4 mb-16">
+                <!-- FAQ Item 1 -->
+                <div class="faq-item reveal-on-scroll">
+                    <button class="w-full py-6 flex justify-between items-center text-left focus:outline-none" onclick="toggleFaq(this)">
+                        <span class="font-bold text-lg">How long does shipping take?</span>
+                        <i class="fas fa-chevron-down faq-icon text-gray-500"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p class="pb-6 text-gray-400">Our pre-configured "Ready to Ship" systems ship within 24-48 hours. Custom configured PCs typically take 5-7 business days for assembly, stress testing, and quality assurance before dispatch.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 2 -->
+                <div class="faq-item reveal-on-scroll">
+                    <button class="w-full py-6 flex justify-between items-center text-left focus:outline-none" onclick="toggleFaq(this)">
+                        <span class="font-bold text-lg">What does the warranty cover?</span>
+                        <i class="fas fa-chevron-down faq-icon text-gray-500"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p class="pb-6 text-gray-400">All MituHub PCs come with a comprehensive 3-year warranty that covers labor and parts. We also offer lifetime technical support via email and phone for any software or configuration issues.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 3 -->
+                <div class="faq-item reveal-on-scroll">
+                    <button class="w-full py-6 flex justify-between items-center text-left focus:outline-none" onclick="toggleFaq(this)">
+                        <span class="font-bold text-lg">Do you ship internationally?</span>
+                        <i class="fas fa-chevron-down faq-icon text-gray-500"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p class="pb-6 text-gray-400">Currently, we ship to all locations within India. We are working on expanding our logistics to cover international shipping in the near future.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Box -->
+            <div class="glass-card rounded-2xl p-8 text-center reveal-on-scroll">
+                <h3 class="text-2xl font-bold mb-4">Still need help?</h3>
+                <p class="text-gray-400 mb-8">Our expert team is ready to assist you with custom quotes or technical issues.</p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <button onclick="toggleChat()" class="btn-interact bg-white text-black font-bold px-8 py-3 rounded-lg hover:bg-gray-200 transition-colors">
+                        <i class="fas fa-comment-alt mr-2"></i> Live Chat
+                    </button>
+                    <button onclick="showEmailToast()" class="btn-interact border border-white/20 hover:bg-white/5 font-bold px-8 py-3 rounded-lg transition-colors">
+                        <i class="fas fa-envelope mr-2"></i> Email Support
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black pt-20 pb-10 border-t border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-12 mb-16">
+                <div class="col-span-2">
+                    <div class="flex items-center gap-2 mb-6">
+                        <svg width="32" height="32" viewBox="0 0 100 100" fill="none">
+                            <path d="M20 80V20L50 50L80 20V80" stroke="#3b82f6" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span class="text-xl font-bold tracking-tighter">MITUHUB</span>
+                    </div>
+                    <p class="text-gray-500 text-sm mb-6 max-w-xs">Elevating India's esports gaming experience through engineering excellence.</p>
+                    <div class="flex gap-4">
+                        <a href="#" class="btn-interact w-10 h-10 rounded-xl bg-zinc-900 flex items-center justify-center hover:bg-blue-600 transition-all"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="btn-interact w-10 h-10 rounded-xl bg-zinc-900 flex items-center justify-center hover:bg-blue-600 transition-all"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="btn-interact w-10 h-10 rounded-xl bg-zinc-900 flex items-center justify-center hover:bg-blue-600 transition-all"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h5 class="font-bold mb-6 text-blue-500">Shop</h5>
+                    <ul class="space-y-4 text-sm text-gray-500">
+                        <li><a href="#builds" class="hover:text-white transition">Gaming PCs</a></li>
+                        <li><a href="#components" class="hover:text-white transition">Components</a></li>
+                        <li><a href="#" class="hover:text-white transition">Monitors</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-bold mb-6 text-blue-500">Support</h5>
+                    <ul class="space-y-4 text-sm text-gray-500">
+                        <li><a href="#support" class="hover:text-white transition">Contact Us</a></li>
+                        <li><a href="#" class="hover:text-white transition">Warranty</a></li>
+                        <li><a href="#" class="hover:text-white transition">FAQs</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="pt-8 border-t border-white/5 text-center md:text-left">
+                <p class="text-xs text-gray-600">© 2024 MituHub Technologies Pvt Ltd.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // --- Cart State Management ---
+        let cart = [];
+        let activeDiscount = null;
+
+        const validCoupons = {
+            'SAVE10': { type: 'percent', value: 10 },
+            'MITU2000': { type: 'flat', value: 2000 },
+            'GAMER5': { type: 'percent', value: 5 }
+        };
+
+        // Add to Cart Function
+        function addToCart(name, price, type = 'pc') {
+            // Parse price string (e.g. "64,990" -> 64990)
+            const numPrice = parseInt(price.replace(/,/g, ''));
+            
+            const item = {
+                id: Date.now(), // simple unique id
+                name: name,
+                price: numPrice,
+                displayPrice: price,
+                type: type
+            };
+
+            cart.push(item);
+            updateCartUI();
+            
+            // Show notification
+            showToast("Added to Cart!", name);
+        }
+
+        // Remove from Cart Function
+        function removeFromCart(id) {
+            cart = cart.filter(item => item.id !== id);
+            
+            // If cart is empty, reset discount
+            if (cart.length === 0) {
+                activeDiscount = null;
+                const msg = document.getElementById('discount-msg');
+                const input = document.getElementById('discount-input');
+                msg.className = "text-xs mt-2 hidden";
+                input.value = "";
+            }
+            
+            updateCartUI();
+        }
+
+        // Apply Discount Function
+        function applyDiscount() {
+            const input = document.getElementById('discount-input');
+            const msg = document.getElementById('discount-msg');
+            const code = input.value.trim().toUpperCase();
+
+            if (cart.length === 0) {
+                msg.textContent = "Add items to cart first!";
+                msg.className = "text-xs mt-2 text-red-400 block";
+                return;
+            }
+
+            if (!code) return;
+
+            if (validCoupons[code]) {
+                activeDiscount = { code, ...validCoupons[code] };
+                msg.textContent = `Coupon '${code}' applied successfully!`;
+                msg.className = "text-xs mt-2 text-green-400 block";
+                updateCartUI();
+            } else {
+                activeDiscount = null;
+                msg.textContent = "Invalid coupon code.";
+                msg.className = "text-xs mt-2 text-red-400 block";
+                updateCartUI();
+            }
+        }
+
+        // Update Cart UI (Sidebar & Badges)
+        function updateCartUI() {
+            // Update Badges
+            const badges = [document.getElementById('cart-badge-desktop'), document.getElementById('cart-badge-mobile')];
+            badges.forEach(badge => {
+                if (badge) {
+                    badge.innerText = cart.length;
+                    badge.style.opacity = cart.length > 0 ? '1' : '0';
+                }
+            });
+
+            // Update Sidebar Items
+            const container = document.getElementById('cart-items-container');
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-cart">
+                        <i class="fas fa-shopping-cart text-4xl mb-3 opacity-20"></i>
+                        <p>Your cart is empty.</p>
+                        <button onclick="toggleCart()" class="mt-4 text-blue-500 text-sm font-bold hover:underline">Start Shopping</button>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = cart.map(item => `
+                    <div class="cart-item">
+                        <div class="w-16 h-16 bg-white/5 rounded-lg flex items-center justify-center shrink-0">
+                            <i class="fas ${item.type === 'pc' ? 'fa-desktop' : 'fa-microchip'} text-2xl text-gray-500"></i>
+                        </div>
+                        <div class="flex-grow">
+                            <h4 class="font-bold text-sm line-clamp-2">${item.name}</h4>
+                            <div class="text-blue-400 text-sm font-bold">₹${item.displayPrice}</div>
+                        </div>
+                        <button onclick="removeFromCart(${item.id})" class="text-gray-500 hover:text-red-500 transition-colors self-start">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                `).join('');
+            }
+
+            // Update Totals with Discount Logic
+            const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+            let discountAmount = 0;
+            let finalTotal = subtotal;
+
+            const discountRow = document.getElementById('discount-row');
+            const discountLabel = document.getElementById('discount-code-label');
+            const discountValue = document.getElementById('cart-discount');
+
+            if (activeDiscount && subtotal > 0) {
+                if (activeDiscount.type === 'percent') {
+                    discountAmount = Math.round(subtotal * (activeDiscount.value / 100));
+                } else if (activeDiscount.type === 'flat') {
+                    discountAmount = activeDiscount.value;
+                }
+                
+                // Prevent negative total
+                discountAmount = Math.min(discountAmount, subtotal);
+                finalTotal = subtotal - discountAmount;
+
+                // Show Discount Row
+                discountRow.classList.remove('hidden');
+                discountLabel.innerText = activeDiscount.code;
+                discountValue.innerText = "-₹" + discountAmount.toLocaleString('en-IN');
+            } else {
+                // Hide Discount Row if no discount or empty cart
+                discountRow.classList.add('hidden');
+            }
+            
+            document.getElementById('cart-subtotal').innerText = "₹" + subtotal.toLocaleString('en-IN');
+            document.getElementById('cart-total').innerText = "₹" + finalTotal.toLocaleString('en-IN');
+        }
+
+        // Toggle Cart Sidebar
+        function toggleCart() {
+            const sidebar = document.getElementById('cart-sidebar');
+            sidebar.classList.toggle('active');
+        }
+
+
+        // --- 1. Navigation & Mobile Menu ---
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const closeBtn = document.getElementById('close-menu');
+        const overlay = document.getElementById('mobile-overlay');
+
+        const toggleMenu = () => overlay.classList.toggle('open');
+        
+        mobileBtn.addEventListener('click', toggleMenu);
+        closeBtn.addEventListener('click', toggleMenu);
+        
+        document.querySelectorAll('.mobile-link').forEach(link => {
+            link.addEventListener('click', () => overlay.classList.remove('open'));
+        });
+
+        // --- 2. Filter Logic ---
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const pcCards = document.querySelectorAll('.pc-card');
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Update button UI
+                filterBtns.forEach(b => b.classList.remove('bg-blue-600'));
+                btn.classList.add('bg-blue-600');
+
+                const filter = btn.getAttribute('data-filter');
+                
+                pcCards.forEach(card => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.95)';
+                    
+                    setTimeout(() => {
+                        if (filter === 'all' || card.classList.contains(`pc-${filter}`)) {
+                            card.classList.remove('hidden-card');
+                            setTimeout(() => {
+                                card.style.opacity = '1';
+                                card.style.transform = 'scale(1)';
+                            }, 50);
+                        } else {
+                            card.classList.add('hidden-card');
+                        }
+                    }, 300);
+                });
+            });
+        });
+
+        const scrollToFilter = (type) => {
+            document.querySelector('#builds').scrollIntoView({ behavior: 'smooth' });
+            setTimeout(() => {
+                const btn = document.querySelector(`[data-filter="${type.toLowerCase()}"]`);
+                if (btn) btn.click();
+            }, 800);
+        };
+
+        // --- 3. Notification System ---
+        const toastContainer = document.getElementById('toast-container');
+
+        const showToast = (title, message, iconClass = "fa-check", iconColor = "text-blue-500") => {
+            const toast = document.createElement('div');
+            toast.className = "toast-notification flex items-center gap-4 bg-zinc-900 border border-blue-500/50 p-4 rounded-2xl shadow-2xl backdrop-blur-xl w-72";
+            toast.innerHTML = `
+                <div class="bg-blue-500/20 w-10 h-10 rounded-full flex items-center justify-center shrink-0">
+                    <i class="fas ${iconClass} ${iconColor}"></i>
+                </div>
+                <div class="flex-grow">
+                    <h4 class="font-bold text-sm">${title}</h4>
+                    <p class="text-xs text-gray-400 truncate">${message}</p>
+                </div>
+                <button class="text-gray-500 hover:text-white">&times;</button>
+            `;
+
+            toastContainer.appendChild(toast);
+            
+            // Animate In
+            requestAnimationFrame(() => toast.classList.add('show'));
+
+            // Auto Remove
+            const timer = setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+
+            // Manual Close
+            toast.querySelector('button').onclick = () => {
+                clearTimeout(timer);
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            };
+        };
+
+        // Initialize Add to Cart Buttons for PC Builds
+        document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const card = btn.closest('.pc-card');
+                const name = card.getAttribute('data-name');
+                const price = card.getAttribute('data-price');
+                addToCart(name, price, 'pc');
+            });
+        });
+        
+        // Email Support Toast
+        const showEmailToast = () => {
+            // Copy email to clipboard
+            navigator.clipboard.writeText('support@mituhub.com');
+            showToast("Email Copied!", "support@mituhub.com", "fa-envelope", "text-purple-500");
+        };
+
+        // --- 4. Product Modal & Data ---
+        const componentData = {
+            gpu: {
+                title: "Graphics Cards",
+                products: [
+                    { name: "NVIDIA RTX 4090", price: "1,85,000", desc: "24GB GDDR6X - The King of 4K", icon: "fa-microchip" },
+                    { name: "NVIDIA RTX 4070 Super", price: "65,000", desc: "12GB GDDR6X - Best for 1440p", icon: "fa-microchip" },
+                    { name: "NVIDIA RTX 3060 Ti", price: "32,000", desc: "8GB GDDR6 - Budget 1080p Beast", icon: "fa-microchip" },
+                    { name: "AMD Radeon RX 7800 XT", price: "52,000", desc: "16GB GDDR6 - Rasterization Value", icon: "fa-microchip" }
+                ]
+            },
+            cpu: {
+                title: "Processors",
+                products: [
+                    { name: "Intel Core i7-14700K", price: "38,990", desc: "20 Cores, 5.6GHz - Gaming & Work", icon: "fa-server" },
+                    { name: "AMD Ryzen 7 7800X3D", price: "36,990", desc: "World's Best Gaming CPU", icon: "fa-server" },
+                    { name: "Intel Core i9-14900KS", price: "62,990", desc: "24 Cores, 6.2GHz - Extreme Speed", icon: "fa-server" },
+                    { name: "AMD Ryzen 5 7600X", price: "21,990", desc: "6 Cores - Great Entry Level", icon: "fa-server" }
+                ]
+            },
+            memory: {
+                title: "Memory & Storage",
+                products: [
+                    { name: "G.Skill Trident Z5 32GB", price: "12,500", desc: "DDR5 6000MHz CL30 RGB", icon: "fa-memory" },
+                    { name: "Samsung 990 Pro 2TB", price: "16,990", desc: "NVMe Gen4 - 7450MB/s", icon: "fa-hdd" },
+                    { name: "Corsair Vengeance 64GB", price: "22,000", desc: "DDR5 5600MHz - Workstation Kit", icon: "fa-memory" },
+                    { name: "WD Black SN850X 1TB", price: "8,500", desc: "NVMe Gen4 - Game Drive", icon: "fa-hdd" }
+                ]
+            },
+            gear: {
+                title: "Gaming Gear",
+                products: [
+                    { name: "Logitech G Pro X Superlight 2", price: "13,995", desc: "Wireless Lightweight Mouse", icon: "fa-mouse" },
+                    { name: "Razer Huntsman V3 Pro", price: "21,999", desc: "Analog Optical Switch Keyboard", icon: "fa-keyboard" },
+                    { name: "HyperX Cloud III Wireless", price: "14,500", desc: "120hr Battery Life Headset", icon: "fa-headset" },
+                    { name: "SteelSeries Apex Pro TKL", price: "18,999", desc: "Adjustable Actuation Switches", icon: "fa-keyboard" }
+                ]
+            }
+        };
+
+        const modal = document.getElementById('product-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalGrid = document.getElementById('modal-grid');
+
+        window.openComponentModal = function(category) {
+            const data = componentData[category];
+            if (!data) return;
+
+            modalTitle.innerText = data.title;
+            modalGrid.innerHTML = '';
+
+            data.products.forEach(prod => {
+                const el = document.createElement('div');
+                el.className = "bg-white/5 border border-white/10 rounded-xl p-5 hover:bg-white/10 transition-colors flex items-center justify-between group";
+                el.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-lg bg-black/50 flex items-center justify-center text-blue-500 text-xl group-hover:text-purple-400 transition-colors">
+                            <i class="fas ${prod.icon}"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-lg">${prod.name}</h4>
+                            <p class="text-xs text-gray-400">${prod.desc}</p>
+                            <div class="text-blue-400 font-bold mt-1">₹${prod.price}</div>
+                        </div>
+                    </div>
+                    <button onclick="addToCart('${prod.name}', '${prod.price}', 'component')" class="w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-500 flex items-center justify-center transition-colors shadow-lg shadow-blue-500/30">
+                        <i class="fas fa-plus text-white text-sm"></i>
+                    </button>
+                `;
+                modalGrid.appendChild(el);
+            });
+
+            modal.classList.add('active');
+        };
+
+        window.closeProductModal = function() {
+            modal.classList.remove('active');
+        };
+        
+        // Close modal on outside click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeProductModal();
+        });
+
+        // --- 5. Scroll Animations (Reveal) ---
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal-on-scroll').forEach(el => observer.observe(el));
+
+        // Smooth scroll for nav
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const targetId = this.getAttribute('href');
+                if (targetId && targetId !== "#" && targetId.startsWith('#')) {
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        e.preventDefault();
+                        targetElement.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            });
+        });
+
+        // --- 6. FAQ Toggle Logic ---
+        window.toggleFaq = function(button) {
+            const item = button.parentElement;
+            const isActive = item.classList.contains('active');
+            
+            // Close all other FAQs
+            document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('active'));
+            
+            // Toggle clicked FAQ
+            if (!isActive) {
+                item.classList.add('active');
+            }
+        };
+
+        // --- 7. Live Chat Logic ---
+        const chatWidget = document.getElementById('chat-widget');
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        
+        window.toggleChat = function() {
+            chatWidget.classList.toggle('active');
+            if(chatWidget.classList.contains('active')) {
+                setTimeout(() => chatInput.focus(), 100);
+            }
+        }
+
+        window.handleChatKey = function(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+
+        window.sendMessage = function() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            // User Message
+            appendMessage(text, 'user');
+            chatInput.value = '';
+
+            // Simulate Bot Typing
+            showTypingIndicator();
+
+            // Simulate Bot Response delay
+            setTimeout(() => {
+                removeTypingIndicator();
+                const response = getBotResponse(text);
+                appendMessage(response, 'bot');
+            }, 1500);
+        }
+
+        function appendMessage(text, sender) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${sender}`;
+            msgDiv.innerText = text;
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot typing-indicator';
+            typingDiv.id = 'typing-indicator';
+            typingDiv.innerHTML = '<span></span><span></span><span></span>';
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) indicator.remove();
+        }
+
+        function getBotResponse(input) {
+            input = input.toLowerCase();
+            if (input.includes('price') || input.includes('cost')) return "Our PCs range from ₹64,990 to ₹2,59,990 depending on the specs! Check the 'PC Builds' section above.";
+            if (input.includes('shipping') || input.includes('delivery')) return "We ship ready-to-ship systems within 48 hours!";
+            if (input.includes('warranty')) return "We offer a comprehensive 3-year warranty on all builds.";
+            if (input.includes('hello') || input.includes('hi')) return "Hello! Ready to upgrade your setup?";
+            return "Thanks for reaching out! A human specialist will review your question shortly. In the meantime, you can email us at support@mituhub.com.";
+        }
+    </script>
+</body>
+</html>
