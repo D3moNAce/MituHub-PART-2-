@@ -843,7 +843,9 @@
 
     <script>
         // --- 0. Gemini API Configuration ---
-        const apiKey = ""; // The execution environment provides the key at runtime. If hosting locally, paste your API key here.
+        // TODO: Get your free key at https://aistudio.google.com/app/apikey
+        // If hosting on GitHub, restrict this key to your domain in Google Cloud Console to prevent misuse.
+        const apiKey = ""; 
 
         // --- Cart State Management ---
         let cart = [];
@@ -1258,23 +1260,31 @@
             // Simulate Bot Typing
             showTypingIndicator();
 
+            // 1. Check if API Key is missing. If so, use offline mode immediately (No delay).
+            if (!apiKey || apiKey === "YOUR_GEMINI_API_KEY_HERE") {
+                setTimeout(() => {
+                    removeTypingIndicator();
+                    const fallback = getBotResponse(text);
+                    appendMessage(fallback, 'bot');
+                }, 600); // Small natural delay for offline bot
+                return;
+            }
+
+            // 2. If Key exists, try AI
             try {
-                // Call Gemini API
                 const botReply = await callGeminiAPI(text);
                 removeTypingIndicator();
                 appendMessage(botReply, 'bot');
             } catch (error) {
                 removeTypingIndicator();
                 console.error("Gemini API Error:", error);
-                // Fallback response if API fails
+                // Instant fallback if API fails
                 const fallback = getBotResponse(text);
                 appendMessage(fallback, 'bot');
             }
         }
 
         async function callGeminiAPI(userMessage) {
-            // Validation removed to allow environment injection
-
             const systemPrompt = `
                 You are MituBot, the elite AI sales assistant for MituHub, India's premier esports PC store.
                 Your goal is to help customers build their dream setup, explain technical specs simply, and close sales.
@@ -1288,72 +1298,4 @@
                    - Best For: 1440p Pro gaming, Streaming, High FPS in AAA titles (Cyberpunk, COD).
                 
                 **Components & Pricing (Approx):**
-                - GPUs: RTX 4090 (₹1.85L - 4K Beast), 4070 Super (₹65k), 3060 Ti (₹32k).
-                - CPUs: i7-14700K (₹39k), Ryzen 7 7800X3D (₹37k - Gaming King).
-                
-                **Store Policies:**
-                - ⚡ Shipping: Ready-to-ship systems dispatch in 48hrs.
-                - 🛡️ Warranty: 3 Years comprehensive on all builds.
-                - 📍 Region: Shipping across India.
-                
-                **Behavior:**
-                - Be enthusiastic, professional, and helpful.
-                - If asked about budget, suggest the Starter. If performance is key, suggest Apex.
-                - Keep answers concise (under 3 sentences) unless asked for details.
-                - Use emojis occasionally.
-                - If unsure, ask them to email support@mituhub.com.
-            `;
-
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-            
-            const payload = {
-                contents: [{
-                    parts: [{ text: systemPrompt + "\n\nUser Question: " + userMessage }]
-                }]
-            };
-
-            // Simple retry logic with exponential backoff
-            const delays = [1000, 2000, 4000];
-            for (let i = 0; i <= delays.length; i++) {
-                try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-                    const data = await response.json();
-                    return data.candidates?.[0]?.content?.parts?.[0]?.text || "I'm not sure how to answer that.";
-                } catch (err) {
-                    if (i === delays.length) throw err;
-                    await new Promise(res => setTimeout(res, delays[i]));
-                }
-            }
-        }
-
-        function appendMessage(text, sender) {
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `message ${sender}`;
-            msgDiv.innerText = text;
-            chatMessages.appendChild(msgDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function showTypingIndicator() {
-            const typingDiv = document.createElement('div');
-            typingDiv.className = 'message bot typing-indicator';
-            typingDiv.id = 'typing-indicator';
-            typingDiv.innerHTML = '<span></span><span></span><span></span>';
-            chatMessages.appendChild(typingDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function removeTypingIndicator() {
-            const indicator = document.getElementById('typing-indicator');
-            if (indicator) indicator.remove();
-        }
-    </script>
-</body>
-</html>
+                - GPUs:
